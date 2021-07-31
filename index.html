@@ -18,30 +18,70 @@
         canvas.height = document.documentElement.clientHeight
         //设置canvas的宽高为文档宽高
         let ctx = canvas.getContext("2d");
-
-        let painting = false
-        //给painting赋值为false
         ctx.fillStyle = "black";
         //设置填充颜色为黑色
         ctx.strokeStyle = 'none'
-        canvas.onmousedown = () => {
-            painting = true
+        //描边样式
+        ctx.lineWidth = 8;
+        //线条宽度
+        ctx.lineCap = "round";
+        //设置线的末尾为圆的
+        function drawLine(x1, y1, x2, y2) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
         }
-        //设置鼠标点击是canvas为true
-        canvas.onmousemove = (e) => {
-            if (painting === true) {
-                ctx.beginPath();
-                ctx.arc(e.clientX, e.clientY, 10, 0, 2 * Math.PI);
-                ctx.stroke();
-                ctx.fill();
-            } else {
-                console.log('什么都不做')
+        //传四个参数 把四个参数放到一一位置
+
+        let painting = false
+        //给painting赋值为false
+        let last
+        var isTouchDevice = 'ontouchstart' in
+            document.documentElement;
+        if (isTouchDevice) {
+            canvas.ontouchstart = (a) => {
+                let x = a.touches[0].clientX
+                let y = a.touches[0].clientY
+                last = [x, y]
+                //设置第一次的last位置为第一个手指点击屏幕的位置
+            }
+            canvas.ontouchmove = (a) => {
+                let x = (a.touches[0]).clientX
+                let y = (a.touches[0]).clientY
+                //设置第一个手指点击屏幕的位置
+                drawLine(last[0], last[1], x, y)
+                //连接第一次的last位置和后面一次手指点击的位置
+                last = [x, y]
+                //设置last为这次手指点击的位置
+            }
+            //兼容手机 监听手机触摸事件 设置xy为第一个手指触摸的位置 创建一个半径10的圆
+        } else {
+            canvas.onmousedown = (e) => {
+                painting = true
+                last = [e.clientX, e.clientY]
+                //保存下一次的上一次的位置
+            }
+            //设置last为鼠标点击的位置
+            canvas.onmousemove = (e) => {
+                if (painting === true) {
+                    drawLine(last[0], last[1], e.clientX, e.clientY)
+                    //从上一次的点开始直线到这次的点
+                    last = [e.clientX, e.clientY]
+                    //记录这次的点为下次的点
+
+                    // ctx.beginPath();
+                    // ctx.arc(e.clientX, e.clientY, 10, 0, 2 * Math.PI);
+                    // ctx.stroke();
+                    // ctx.fill();
+                    //canvas为true时就创建一个半径10的圆，不是就在控制台打印出什么都不做
+                }
+            }
+            canvas.onmouseup = () => {
+                painting = false
             }
         }
-        //canvas为true时就创建一个半径10的圆，不是就在控制台打印出什么都不做
-        canvas.onmouseup = () => {
-            painting = false
-        }
+
         //当鼠标松开时设置canvas为false
     </script>
 </body>
